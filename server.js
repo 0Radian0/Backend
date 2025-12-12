@@ -25,6 +25,10 @@ app.use('/api', authRoutes);
 app.use('/api', paymentsRoutes);
 app.use('/api', trainRoutes);
 
+app.use('/api/testdb', require('./routes/testdb'));
+
+
+
 // Dodanie tymczasowego endpointu importu SQL
 app.use('/api', importSQLRouter);
 
