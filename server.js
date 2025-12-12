@@ -23,8 +23,28 @@ app.use('/api', trainRoutes);
 const PORT = process.env.PORT || 5000;
 
 // ===============================
+// [Railway] Funkcja testująca połączenie z MySQL
+// ===============================
+async function testDatabaseConnection() {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT
+    });
+    console.log("✅ Połączono z bazą danych!");
+    await connection.end();
+  } catch (err) {
+    console.error("❌ Błąd połączenia z bazą danych:", err.message);
+  }
+}
+
+// ===============================
 // [Railway] Uruchomienie serwera
 // ===============================
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Serwer działa na porcie ${PORT}`);
+  await testDatabaseConnection(); // test połączenia z DB przy starcie
 });
