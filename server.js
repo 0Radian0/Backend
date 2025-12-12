@@ -9,13 +9,24 @@ const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
 const trainRoutes = require('./routes/trainings');
 
+// ===============================
+// [Railway] Tymczasowy endpoint importu SQL
+// ===============================
+const importSQLRouter = require('./import-sql-endpoint');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ===============================
+// [Railway] Rejestracja wszystkich routów
+// ===============================
 app.use('/api', authRoutes);
 app.use('/api', paymentsRoutes);
 app.use('/api', trainRoutes);
+
+// Dodanie tymczasowego endpointu importu SQL
+app.use('/api', importSQLRouter);
 
 // ===============================
 // [Railway] Dynamiczny port
