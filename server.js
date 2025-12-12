@@ -14,6 +14,11 @@ const trainRoutes = require('./routes/trainings');
 // ===============================
 const importSQLRouter = require('./import-sql-endpoint');
 
+// ===============================
+// [Railway] Tymczasowy endpoint testowy do sprawdzenia tabel
+// ===============================
+const testDBRouter = require('./routes/testdb');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -21,16 +26,15 @@ app.use(express.json());
 // ===============================
 // [Railway] Rejestracja wszystkich routów
 // ===============================
-app.use('/api', authRoutes);
-app.use('/api', paymentsRoutes);
-app.use('/api', trainRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/trainings', trainRoutes);
 
-app.use('/api/testdb', require('./routes/testdb'));
-
-
-
-// Dodanie tymczasowego endpointu importu SQL
-app.use('/api', importSQLRouter);
+// ===============================
+// [Railway] Rejestracja tymczasowych endpointów
+// ===============================
+app.use('/api/import', importSQLRouter);      // import SQL
+app.use('/api/testdb', testDBRouter);         // test połączenia i listy tabel
 
 // ===============================
 // [Railway] Dynamiczny port
