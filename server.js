@@ -20,29 +20,49 @@ const importSQLRouter = require('./import-sql-endpoint');
 const testDBRouter = require('./routes/testdb');
 
 const app = express();
-app.use(cors());
+
+/**
+ * ===============================
+ * CORS – POZWALAMY TYLKO NA FRONTEND Z NETLIFY
+ * ===============================
+ * Dzięki temu React (Netlify) może komunikować się z API (Railway)
+ * a przeglądarka nie zablokuje requestów
+ */
+app.use(cors({
+  origin: "https://szermierka-historyczna-lublin.netlify.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+
+
+/**
+ * ===============================
+ * Middleware do JSON
+ * ===============================
+ */
 app.use(express.json());
 
 // ===============================
-// [Railway] Rejestracja wszystkich routów
+// Rejestracja głównych routów API
 // ===============================
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/trainings', trainRoutes);
 
 // ===============================
-// [Railway] Rejestracja tymczasowych endpointów
+// Tymczasowe endpointy Railway
 // ===============================
 app.use('/api/import', importSQLRouter);      // import SQL
 app.use('/api/testdb', testDBRouter);         // test połączenia i listy tabel
 
 // ===============================
-// [Railway] Dynamiczny port
+// Dynamiczny port (Railway / lokalnie)
 // ===============================
 const PORT = process.env.PORT || 5000;
 
 // ===============================
-// [Railway] Funkcja testująca połączenie z MySQL
+// Test połączenia z bazą danych MySQL
 // ===============================
 async function testDatabaseConnection() {
   try {
@@ -61,9 +81,9 @@ async function testDatabaseConnection() {
 }
 
 // ===============================
-// [Railway] Uruchomienie serwera
+// Uruchomienie serwera
 // ===============================
 app.listen(PORT, async () => {
-  console.log(`Serwer działa na porcie ${PORT}`);
-  await testDatabaseConnection(); // test połączenia z DB przy starcie
+  console.log(`🚀 Serwer działa na porcie ${PORT}`);
+  await testDatabaseConnection(); // test DB przy starcie
 });
