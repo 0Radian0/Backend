@@ -18,19 +18,16 @@ exports.sendEmail = async (req, res) => {
     try {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT),
-            secure: process.env.SMTP_SECURE === "true",
+            port: parseInt(process.env.SMTP_PORT), // ✅ WAŻNE: parseInt()
+            secure: process.env.SMTP_SECURE === "true", // ✅ Port 465 wymaga secure: true
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
-            // Dodatkowe opcje dla Gmaila
-            tls: {
-                rejectUnauthorized: false
-            }
         });
 
         // Test połączenia
+        console.log("🔄 Testuję połączenie SMTP...");
         await transporter.verify();
         console.log("✅ Połączenie SMTP OK");
 
@@ -50,11 +47,10 @@ exports.sendEmail = async (req, res) => {
         console.error("❌ Błąd wysyłki maila:");
         console.error("❌ Kod błędu:", err.code);
         console.error("❌ Wiadomość:", err.message);
-        console.error("❌ Pełny błąd:", err);
         
         res.status(500).json({ 
             error: "Nie udało się wysłać maila.",
-            details: err.message // Dodaj szczegóły błędu dla debugowania
+            details: err.message
         });
     }
 };
