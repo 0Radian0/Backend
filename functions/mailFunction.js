@@ -14,6 +14,7 @@ exports.sendEmail = async (req, res) => {
         const resend = new Resend(process.env.RESEND_API_KEY);
 
         // Wysyłka maila
+        
         const data = await resend.emails.send({
             from: 'Szermierka Historyczna <onboarding@resend.dev>', // ✅ Domyślny adres (dopóki nie dodasz domeny)
             to: toWho,

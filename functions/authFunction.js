@@ -5,7 +5,9 @@ const userModel = require('../queries/userModel');
 const db = require('../config/db');
 const { sendEmail } = require("./mailFunction");
 
-
+// ✅ Dynamiczne URLe - pobierane ze zmiennych środowiskowych
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Logowanie
 exports.login = async (req, res) => {
@@ -35,7 +37,6 @@ exports.login = async (req, res) => {
             user: {
                 userID: user.userID,
                 login: user.login,
-                // password: user.password,
                 email: user.email,
                 registrationDate: user.registrationDate,
                 lastLog: user.lastLog,
@@ -46,10 +47,9 @@ exports.login = async (req, res) => {
                 surname: user.surname,
                 paymentActive: user.paymentActive
             }
-
         });
     } catch (error) {
-        console.error('Błąd logowania:', error);
+        console.error('❌ Błąd logowania:', error);
         res.status(500).json({ message: 'Błąd serwera' });
     }
 };
@@ -63,61 +63,66 @@ exports.register = async (req, res) => {
         const emailExists = await userModel.checkIfEmailExists(email);
 
         if (emailExists) return res.status(409).json({ message: 'Użytkownik z podanym emailem już istnieje' });
-        if (loginExist) return res.status(409).json({ message: 'Użytkownik z wprowadzonyn loginem już istnieje' });
+        if (loginExist) return res.status(409).json({ message: 'Użytkownik z wprowadzonym loginem już istnieje' });
 
         const loginRegex = /^.{3,45}$/;
-        if (!loginRegex.test(login)) return res.status(400).json(({ message: 'Proszę wprowadzić login o długości od 3 do 45 znaków.' }));
+        if (!loginRegex.test(login)) return res.status(400).json({ message: 'Proszę wprowadzić login o długości od 3 do 45 znaków.' });
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) return res.status(400).json(({ message: 'Proszę wprowadzić poprawny adres e-mail.' }));
+        if (!emailRegex.test(email)) return res.status(400).json({ message: 'Proszę wprowadzić poprawny adres e-mail.' });
         const nameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+){0,2}$/;
-        if (!nameRegex.test(name)) return res.status(400).json(({ message: 'Wprowadzone imię ma niepoprawny format' }));
+        if (!nameRegex.test(name)) return res.status(400).json({ message: 'Wprowadzone imię ma niepoprawny format' });
         const surnameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:[-\s][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$/;
-        if (!surnameRegex.test(surname)) return res.status(400).json(({ message: 'Wprowadzone nazwisko ma niepoprawny format' }));
-        const passwordRegex = /^.{8,255}$/;;
-        if (!passwordRegex.test(password)) return res.status(400).json(({ message: 'Hasło musi spełniać wymogi bezpieczeństwa (co najmniej 8 znaków).' }));
+        if (!surnameRegex.test(surname)) return res.status(400).json({ message: 'Wprowadzone nazwisko ma niepoprawny format' });
+        const passwordRegex = /^.{8,255}$/;
+        if (!passwordRegex.test(password)) return res.status(400).json({ message: 'Hasło musi spełniać wymogi bezpieczeństwa (co najmniej 8 znaków).' });
 
         // Hashowanie hasła
-        const hashedPassword = await (bcrypt.hash(password, 10));
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Token do autoryzacji
         const verificationToken = crypto.randomBytes(32).toString("hex");
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // ustawienie terminu ważności tokenu na godzinę
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 godziny
 
         // Tworzenie użytkownika
         await userModel.createUser(login, hashedPassword, email, name, surname, verificationToken, verificationExpires);
 
-        // Link weryfikacyjnydla użytkownika 
-        const verifyLink = `http://localhost:5000/api/verify?token=${verificationToken}`;
+        // ✅ Link weryfikacyjny - dynamiczny URL backendu
+        const verifyLink = `${BACKEND_URL}/api/auth/verify?token=${verificationToken}`;
 
-
-        // Wysyłka maila przez endpoint
-        await fetch("http://localhost:5000/api/users/send-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+        // ✅ Bezpośrednie wywołanie funkcji sendEmail (nie przez fetch!)
+        await sendEmail({
+            body: {
                 toWho: email,
                 subject: "Potwierdzenie rejestracji w Klubie Szermierki",
                 html: `
                     <div style="font-family: Arial, sans-serif;">
-                    <h3>Cześć ${name}!</h3>
-                    <p>Dziękujemy za rejestrację w naszym klubie. Aby aktywować konto, kliknij poniższy link:</p>
-                    <p><a href="${verifyLink}" style="color:#1a73e8;">Aktywuj konto</a></p>
-                    <p>Link wygaśnie za 24 godziny.</p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p>Pozdrawiamy,<br>Klub Szermierki Historycznej przy Politechnice Lubelskiej</p>
-                </div>
+                        <h3>Cześć ${name}!</h3>
+                        <p>Dziękujemy za rejestrację w naszym klubie. Aby aktywować konto, kliknij poniższy link:</p>
+                        <p><a href="${verifyLink}" style="color:#1a73e8;">Aktywuj konto</a></p>
+                        <p>Link wygaśnie za 24 godziny.</p>
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                        <p>Pozdrawiamy,<br>Klub Szermierki Historycznej przy Politechnice Lubelskiej</p>
+                    </div>
                 `
+            }
+        }, {
+            status: (code) => ({
+                json: (data) => {
+                    if (code !== 200) {
+                        throw new Error(data.error || 'Błąd wysyłki maila');
+                    }
+                }
             })
         });
 
         return res.json({
             success: true,
-            message: "Utworzono użytkownika. Na podany przy rejestracji adres e-mail został wysłany link aktywacyjny. Linkt jest ważny godzinę, po czym rejestracja będzie nieważna"
+            message: "Utworzono użytkownika. Na podany przy rejestracji adres e-mail został wysłany link aktywacyjny. Link jest ważny 24 godziny."
         });
 
     } catch (err) {
-        console.error('Błąd rejestracji:', err);
-        return res.status(500).json({ message: 'Błąd serwera' });
+        console.error('❌ Błąd rejestracji:', err);
+        return res.status(500).json({ message: 'Błąd serwera: ' + err.message });
     }
 };
 
@@ -131,20 +136,18 @@ exports.verifyAccount = async (req, res) => {
         const user = await userModel.getUserToken(token);
 
         if (!user) return res.status(400).json({ message: "Nieprawidłowy token." });
-        if (new Date(user.verificationExpires) < new Date()) return res.status(400).json({ message: "Token wygasł. Poproś o nowy link aktywacyjny." });
+        if (new Date(user.verificationExpires) < new Date()) {
+            return res.status(400).json({ message: "Token wygasł. Poproś o nowy link aktywacyjny." });
+        }
 
         // Aktywacja konta
         await userModel.verifyEmail(user.userID);
 
-        // return res.json({
-        //     success: true,
-        //     message: "Konto zostało pomyślnie aktywowane! Możesz się teraz zalogować.",
-        // });
-        const frontendURL = `http://localhost:3000/login`;
-        return res.redirect(frontendURL);
+        // ✅ Przekierowanie na frontend - dynamiczny URL
+        return res.redirect(`${FRONTEND_URL}/login?verified=true`);
 
     } catch (err) {
-        console.error("Błąd weryfikacji konta:", err);
+        console.error("❌ Błąd weryfikacji konta:", err);
         return res.status(500).json({ message: "Błąd serwera" });
     }
 };

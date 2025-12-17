@@ -4,9 +4,10 @@ const authFunction = require('../functions/authFunction');
 const usersFunction = require('../functions/usersFunction');
 const mailFunction = require('../functions/mailFunction');
 
-router.post('/login', authFunction.login);
+router.post('/login', authFunction.login); // To będzie /api/auth/login
 router.post('/register', authFunction.register);
 router.get("/verify", authFunction.verifyAccount);
+
 router.get('/users', usersFunction.showFilteredUsers);
 router.delete('/users/:id', usersFunction.deleteUser);
 router.post('/users/rank', usersFunction.changeRanks);
