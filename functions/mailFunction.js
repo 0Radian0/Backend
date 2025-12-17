@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
 
 exports.sendEmail = async (req, res) => {
     const { toWho, subject, content, html } = req.body;
@@ -8,45 +8,29 @@ exports.sendEmail = async (req, res) => {
     }
 
     console.log("📧 Próba wysłania maila do:", toWho);
-    console.log("📧 SMTP Config:", {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER
-    });
 
     try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT), // ✅ WAŻNE: parseInt()
-            secure: process.env.SMTP_SECURE === "true", // ✅ Port 465 wymaga secure: true
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
+        // Inicjalizacja Resend z API Key
+        const resend = new Resend(process.env.RESEND_API_KEY);
+
+        // Wysyłka maila
+        const data = await resend.emails.send({
+            from: 'Szermierka Historyczna <onboarding@resend.dev>', // ✅ Domyślny adres (dopóki nie dodasz domeny)
+            to: toWho,
+            subject: subject,
+            html: html || `<p>${content}</p>`,
         });
 
-        // Test połączenia
-        console.log("🔄 Testuję połączenie SMTP...");
-        await transporter.verify();
-        console.log("✅ Połączenie SMTP OK");
-
-        const mailOptions = {
-            from: process.env.SMTP_USER,
-            to: toWho,
-            subject,
-            html,
-            text: content,
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("✅ Mail wysłany:", info.messageId);
+        console.log("✅ Mail wysłany! ID:", data.id);
         
-        res.status(200).json({ message: "Mail wysłany pomyślnie!" });
+        res.status(200).json({ 
+            message: "Mail wysłany pomyślnie!",
+            messageId: data.id 
+        });
+
     } catch (err) {
         console.error("❌ Błąd wysyłki maila:");
-        console.error("❌ Kod błędu:", err.code);
-        console.error("❌ Wiadomość:", err.message);
+        console.error("❌ Szczegóły:", err);
         
         res.status(500).json({ 
             error: "Nie udało się wysłać maila.",
