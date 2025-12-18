@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../config/db');         //Do poprawy
 
 // Pobranie danych użytkownika na podstawie emaila
 const getUserByEmail = async (email) => {

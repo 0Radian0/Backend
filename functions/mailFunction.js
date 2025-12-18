@@ -1,4 +1,4 @@
-const { Resend } = require('resend');
+const { Resend } = require('resend');       //Zatwierdzony
 
 exports.sendEmail = async (req, res) => {
     const { toWho, subject, content, html } = req.body;

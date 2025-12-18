@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../config/db');         //Do poprawy
 
 // Wyświetlanie salda płatności dla użytkownika
 const getPaymentStatus = async (userID) => {

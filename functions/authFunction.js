@@ -6,7 +6,7 @@ const db = require('../config/db');
 const { sendEmail } = require("./mailFunction");
 
 // ✅ Dynamiczne URLe - pobierane ze zmiennych środowiskowych
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';     //localgosty ? sprawdzic
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Logowanie

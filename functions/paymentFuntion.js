@@ -1,4 +1,4 @@
-const payModel = require('../queries/paymentsModel.js');
+const payModel = require('../queries/paymentsModel.js');        //Nie zmieniony
 
 // podaje saldo płatności użytkownika
 exports.getPaymentStatus = async (req, res) => {

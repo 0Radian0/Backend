@@ -1,4 +1,4 @@
-const userModel = require('../queries/userModel');
+const userModel = require('../queries/userModel');      //Nie zmieniony
 const db = require('../config/db');
 const express = require("express");
 const router = express.Router();

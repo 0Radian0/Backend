@@ -1,4 +1,4 @@
-const trainingsModel = require('../queries/trainingsModel.js')
+const trainingsModel = require('../queries/trainingsModel.js')      //Nie zmieniony
 
 // Wyświetlanie filtrowanych rekordów
 exports.showTrainingsTable = async (req, res) => {

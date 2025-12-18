@@ -1,4 +1,4 @@
-const db = require('../config/db.js');
+const db = require('../config/db.js');      //Do porpawy
 
 // Wyświetlanie, sortowanie i filtrowanie treningów
 const getAllTraining = async (
