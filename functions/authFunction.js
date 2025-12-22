@@ -5,9 +5,12 @@ const userModel = require('../queries/userModel');
 const db = require('../config/db');
 const { sendEmail } = require("./mailFunction");
 
-// ✅ Dynamiczne URLe - pobierane ze zmiennych środowiskowych
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';     //localgosty ? sprawdzic
+// ✅ Dynamiczne URLe - pobierane ze zmiennych środowiskowych Railway
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+console.log('🔍 BACKEND_URL:', BACKEND_URL);
+console.log('🔍 FRONTEND_URL:', FRONTEND_URL);
 
 // Logowanie
 exports.login = async (req, res) => {
@@ -86,10 +89,13 @@ exports.register = async (req, res) => {
         // Tworzenie użytkownika
         await userModel.createUser(login, hashedPassword, email, name, surname, verificationToken, verificationExpires);
 
-        // ✅ Link weryfikacyjny - dynamiczny URL backendu
+        // ✅ Link weryfikacyjny - używa BACKEND_URL ze zmiennych środowiskowych
         const verifyLink = `${BACKEND_URL}/api/auth/verify?token=${verificationToken}`;
 
-        // ✅ Bezpośrednie wywołanie funkcji sendEmail (nie przez fetch!)
+        console.log('📧 Wysyłam mail weryfikacyjny na:', email);
+        console.log('🔗 Link weryfikacyjny:', verifyLink);
+
+        // ✅ Bezpośrednie wywołanie funkcji sendEmail
         await sendEmail({
             body: {
                 toWho: email,
@@ -143,7 +149,9 @@ exports.verifyAccount = async (req, res) => {
         // Aktywacja konta
         await userModel.verifyEmail(user.userID);
 
-        // ✅ Przekierowanie na frontend - dynamiczny URL
+        console.log('✅ Konto zweryfikowane, przekierowanie na:', `${FRONTEND_URL}/login?verified=true`);
+
+        // ✅ Przekierowanie na frontend - używa FRONTEND_URL ze zmiennych środowiskowych
         return res.redirect(`${FRONTEND_URL}/login?verified=true`);
 
     } catch (err) {

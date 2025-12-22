@@ -1,4 +1,4 @@
-const userModel = require('../queries/userModel');      //Nie zmieniony
+const userModel = require('../queries/userModel');
 const db = require('../config/db');
 const express = require("express");
 const router = express.Router();
@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require("./mailFunction");
+
+// ✅ Dynamiczne URLe
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 function generateRandomPassword(length = 8) {
     let password = '';
@@ -62,28 +65,33 @@ exports.resetPassword = async (req, res) => {
     const newPassword = generateRandomPassword();
 
     try {
-
         const user = await userModel.getUserByID(userID);
         if (!user) return res.status(404).json({ error: "Nie znaleziono użytkownika" });
 
-        // Wysyłka maila przez endpoint
-        await fetch("http://localhost:5000/api/users/send-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+        // ✅ Bezpośrednie wywołanie sendEmail (nie przez fetch!)
+        await sendEmail({
+            body: {
                 toWho: user.email,
-                subject: "Klub Szermierki Historycznej przy Politechnice Lubelskiej - reset hasła",
+                subject: "Klub Szermierki Historycznej - reset hasła",
                 html: `
                     <div style="font-family: Arial, sans-serif;">
                         <h3>Reset hasła</h3>
-                        <p>Twoje hasło zostało pomyślnie zresetowane</p>
-                        <p><strong>Nowe hasło użytkownika:</strong> ${newPassword}</p>
+                        <p>Twoje hasło zostało pomyślnie zresetowane przez administratora.</p>
+                        <p><strong>Nowe hasło:</strong> ${newPassword}</p>
                         <p>Zaloguj się na swoje konto przy użyciu powyższego hasła.</p>
-                        <p>Po zalogowaniu się do aplikacji zalecamy zmianę tego hasła w ustawieniach profilu.</p>
+                        <p>Po zalogowaniu zalecamy zmianę tego hasła w ustawieniach profilu.</p>
                         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                         <p>Pozdrawiamy,<br>Klub Szermierki Historycznej przy Politechnice Lubelskiej</p>
                     </div>
                 `
+            }
+        }, {
+            status: (code) => ({
+                json: (data) => {
+                    if (code !== 200) {
+                        throw new Error(data.error || 'Błąd wysyłki maila');
+                    }
+                }
             })
         });
 
@@ -157,10 +165,9 @@ exports.deactivateUser = async (req, res) => {
     }
 };
 
-//Wyłączanie użytkownika z opłat
+// Wyłączanie użytkownika z opłat
 exports.changePaymentStatus = async (req, res) => {
     const { userID, paymentActive } = req.body;
-
     const numStatus = Number(paymentActive);
 
     if (!userID || isNaN(Number(userID))) return res.status(400).json({ error: "Wybrany użytkownik nie istnieje" });
@@ -175,14 +182,13 @@ exports.changePaymentStatus = async (req, res) => {
         console.error("Błąd przy zmianie statusu płatności użytkownika:", e);
         return res.status(500).json({ error: "Nie udało się zmienić statusu płatności użytkownika" });
     }
-
 }
 
 // Zmiana danych użytkownika
 exports.changeUserData = async (req, res) => {
     const { login, email, name, surname, id } = req.body;
 
-    if (!login || !email || !name || !surname || !id) return res.status(400).json({ error: "Brak wymganych danych - nie można zmienić danych użytkownika" });
+    if (!login || !email || !name || !surname || !id) return res.status(400).json({ error: "Brak wymaganych danych - nie można zmienić danych użytkownika" });
 
     try {
         // Sprawdzenie czy podane dane już istnieją
@@ -191,12 +197,12 @@ exports.changeUserData = async (req, res) => {
 
         if (email !== currentUser.email) {
             const emailExists = await userModel.checkIfEmailExists(email);
-            if (emailExists) return res.status(409).json({ error: 'Użytkownik z wprowadzonyn emailem już istnieje' });
+            if (emailExists) return res.status(409).json({ error: 'Użytkownik z wprowadzonym emailem już istnieje' });
         }
 
         if (login !== currentUser.login) {
             const loginExist = await userModel.checkIfLoginExists(login);
-            if (loginExist) return res.status(409).json({ error: 'Użytkownik z wprowadzonyn loginem już istnieje' });
+            if (loginExist) return res.status(409).json({ error: 'Użytkownik z wprowadzonym loginem już istnieje' });
         }
 
         await userModel.changeUserData(id, login, email, name, surname);
@@ -220,18 +226,19 @@ exports.sendForgotPasswordEmail = async (req, res) => {
     try {
         // Token i data wygaśnięcia
         const resetPasswordToken = crypto.randomBytes(32).toString("hex");
-        const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // ustawienie terminu ważności tokenu na godzinę
+        const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 godziny
 
         await userModel.createResetPasswordToken(email, resetPasswordToken, resetPasswordExpires);
 
-        // Link weryfikacyjnydla użytkownika 
-        const resetLink = `http://localhost:3000/resetPass/${resetPasswordToken}`;
+        // ✅ Link weryfikacyjny - używa FRONTEND_URL ze zmiennych środowiskowych
+        const resetLink = `${FRONTEND_URL}/resetPass/${resetPasswordToken}`;
 
-        // Wysyłka maila przez endpoint
-        await fetch("http://localhost:5000/api/users/send-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+        console.log('📧 Wysyłam link resetu hasła na:', email);
+        console.log('🔗 Link resetu:', resetLink);
+
+        // ✅ Bezpośrednie wywołanie sendEmail (nie przez fetch!)
+        await sendEmail({
+            body: {
                 toWho: email,
                 subject: "Potwierdzenie resetu hasła użytkownika",
                 html: `
@@ -246,12 +253,20 @@ exports.sendForgotPasswordEmail = async (req, res) => {
                         <p>Pozdrawiamy,<br><strong>Klub Szermierki Historycznej przy Politechnice Lubelskiej</strong></p>
                     </div>
                 `
+            }
+        }, {
+            status: (code) => ({
+                json: (data) => {
+                    if (code !== 200) {
+                        throw new Error(data.error || 'Błąd wysyłki maila');
+                    }
+                }
             })
         });
 
         return res.json({
             success: true,
-            message: "Na podany adres e-mail został wysłany link potwierdzający reset hasła. Po kliknięciu w link uzytkownik zostanie przełączony na stronę zmiany hasła"
+            message: "Na podany adres e-mail został wysłany link potwierdzający reset hasła. Po kliknięciu w link użytkownik zostanie przełączony na stronę zmiany hasła"
         });
 
     } catch (e) {
@@ -262,7 +277,7 @@ exports.sendForgotPasswordEmail = async (req, res) => {
 
 // Resetowanie hasła po tokenie
 exports.resetPasswordToken = async (req, res) => {
-    const {token, newPassword} = req.body;
+    const { token, newPassword } = req.body;
     if (!token) return res.status(404).json({ error: "URL nie zawiera poprawnego tokena" });
 
     try {
@@ -282,5 +297,4 @@ exports.resetPasswordToken = async (req, res) => {
         console.error("Błąd przy resetowaniu hasła:", e);
         res.status(500).json({ error: "Nie udało się zresetować hasła: " });
     }
-
 }
