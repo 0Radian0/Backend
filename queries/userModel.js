@@ -1,5 +1,15 @@
 const db = require('../config/db');         //Do poprawy
 
+// Zmiana danych użytkownika (imię, nazwisko, email)
+const changeUserData = async (userID, { email, name, surname }) => {
+    return db.execute(
+        'UPDATE users SET email = ?, name = ?, surname = ? WHERE userID = ?',
+        [email, name, surname, userID]
+    );
+};
+
+
+
 // Pobranie danych użytkownika na podstawie emaila
 const getUserByEmail = async (email) => {
     const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
