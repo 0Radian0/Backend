@@ -28,6 +28,14 @@ const app = express();
  * Dzięki temu React (Netlify) może komunikować się z API (Railway)
  * a przeglądarka nie zablokuje requestów
  */
+
+app.use((req, res, next) => {
+  console.log("➡️", req.method, req.originalUrl);
+  next();
+});
+
+
+
 app.use(cors({
   origin: "https://szermierka-historyczna-lublin.netlify.app",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
