@@ -64,12 +64,12 @@ const modifyPayment = async (paymentDate, dueDate, amount, id) => {
 
 // Pobieranie statusów do tabelki porównawczej
 const showUserPaymentStatus = async () => {
-    const [tab] = await db.execute(`SELECT u.login,
+    const [tab] = await db.execute(`SELECT u.name,
             COALESCE(SUM(CASE WHEN p.paymentDate IS NULL THEN p.amount ELSE 0 END), 0) AS sumToPay,
             MAX(p.paymentDate) AS lastPaymentDate
         FROM users u
         LEFT JOIN payments p ON u.userID = p.userID
-        GROUP BY u.userID, u.login
+        GROUP BY u.userID, u.name
         ORDER BY COALESCE(SUM(CASE WHEN p.paymentDate IS NULL THEN p.amount ELSE 0 END), 0) DESC,
             MAX(p.paymentDate) ASC
         `);

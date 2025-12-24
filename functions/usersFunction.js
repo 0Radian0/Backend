@@ -22,7 +22,7 @@ function generateRandomPassword(length = 8) {
 
 // Generowanie listy użytkowników
 exports.showFilteredUsers = async (req, res) => {
-    const { rank = 'all', tempSort = 'login', order = 'ASC', statusFilter = "all" } = req.query;
+    const { rank = 'all', tempSort = 'name', order = 'ASC', statusFilter = "all" } = req.query;
 
     try {
         const users = await userModel.filterUsers(rank === 'all' ? null : Number(rank), statusFilter, tempSort, order);
@@ -186,9 +186,9 @@ exports.changePaymentStatus = async (req, res) => {
 
 // Zmiana danych użytkownika
 exports.changeUserData = async (req, res) => {
-    const { login, email, name, surname, id } = req.body;
+    const { email, name, surname, id } = req.body;
 
-    if (!login || !email || !name || !surname || !id) return res.status(400).json({ error: "Brak wymaganych danych - nie można zmienić danych użytkownika" });
+    if (!email || !name || !surname || !id) return res.status(400).json({ error: "Brak wymaganych danych - nie można zmienić danych użytkownika" });
 
     try {
         // Sprawdzenie czy podane dane już istnieją
@@ -200,12 +200,7 @@ exports.changeUserData = async (req, res) => {
             if (emailExists) return res.status(409).json({ error: 'Użytkownik z wprowadzonym emailem już istnieje' });
         }
 
-        if (login !== currentUser.login) {
-            const loginExist = await userModel.checkIfLoginExists(login);
-            if (loginExist) return res.status(409).json({ error: 'Użytkownik z wprowadzonym loginem już istnieje' });
-        }
-
-        await userModel.changeUserData(id, login, email, name, surname);
+        await userModel.changeUserData(id, email, name, surname);
         res.status(200).json({
             success: true,
             message: "Dane użytkownika zostały zmienione"

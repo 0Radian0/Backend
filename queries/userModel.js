@@ -12,11 +12,7 @@ const getUserByID = async (userID) => {
     return rows[0];
 };
 
-// Sprawdzenie czy istnieje taki login w bazie
-const checkIfLoginExists = async (login) => {
-    const [rows] = await db.execute('SELECT userID  FROM users WHERE login = ?', [login])
-    return rows.length > 0;
-}
+
 
 // Sprawdzenie czy istnieje taki mail w bazie
 const checkIfEmailExists = async (email) => {
@@ -25,22 +21,22 @@ const checkIfEmailExists = async (email) => {
 }
 
 // Tworzenie użytkownika
-const createUser = async (login, password, email, name, surname, token, expires) => {
-    return db.execute(`INSERT INTO users (login, password, email, registrationDate, 
+const createUser = async (password, email, name, surname, token, expires) => {
+    return db.execute(`INSERT INTO users (password, email, registrationDate, 
         lastLog, description, rankID, deactivated, name, surname, paymentActive, 
         verified, verificationToken, verificationExpires, resetPasswordToken, resetPasswordExpires ) 
         VALUES (?, ?, ?, NOW(), NOW(), NULL, 3, false, ?, ?, true, false, ?, ?, NULL, NULL)`,
-        [login, password, email, name, surname, token, expires]);
+        [ password, email, name, surname, token, expires]);
 }
 
 // Filtrowanie użytkowników
-const filterUsers = async (rankID, statusFilter, tempSort = "login", order = "ASC") => {
+const filterUsers = async (rankID, statusFilter, tempSort = "name", order = "ASC") => {
     const sortColumns = [
-        "login", "registrationDate", "description", "lastLog",
+        "registrationDate", "description", "lastLog",
         "rankID", "paymentActive", "deactivated", "sumToPay"
     ];
 
-    if (!sortColumns.includes(tempSort)) tempSort = "login";
+    if (!sortColumns.includes(tempSort)) tempSort = "name";
     if (!["ASC", "DESC"].includes(order.toUpperCase())) order = "ASC";
 
     let having = "";
@@ -126,10 +122,7 @@ const changePaymentActive = async (userID, paymentStatus) => {
     return db.execute('UPDATE users SET paymentActive = ? WHERE userID = ?', [paymentStatus, userID]);
 };
 
-// Zmiana danych użytkownika
-const changeUserData = async (userID, newLogin, newEmail, newName, newSurname) => {
-    return db.execute('UPDATE users SET login = ?, email = ?, name = ?, surname = ? WHERE userID = ?', [newLogin, newEmail, newName, newSurname, userID]);
-}
+
 
 // Ustalanie daty ostatniego logowania na dzień dzisiejszy
 const setLastLogOnToday = async (userID) => {
@@ -164,7 +157,7 @@ const clearResetToken = async (id) => {
 }
 
 module.exports = {
-    getUserByEmail, getUserByID, checkIfLoginExists, checkIfEmailExists,
+    getUserByEmail, getUserByID,  checkIfEmailExists,
     createUser, filterUsers, deleteUser, changeRanks, resetPassword,
     changeDescription, deactivateUser, changePaymentActive, changeUserData,
     setLastLogOnToday, getUserToken, verifyEmail, createResetPasswordToken,

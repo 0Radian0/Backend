@@ -39,7 +39,6 @@ exports.login = async (req, res) => {
             token,
             user: {
                 userID: user.userID,
-                login: user.login,
                 email: user.email,
                 registrationDate: user.registrationDate,
                 lastLog: user.lastLog,
@@ -59,17 +58,13 @@ exports.login = async (req, res) => {
 
 // Rejestracja
 exports.register = async (req, res) => {
-    const { login, password, email, name, surname } = req.body;
+    const { password, email, name, surname } = req.body;
     try {
         // walidacja
-        const loginExist = await userModel.checkIfLoginExists(login);
+
         const emailExists = await userModel.checkIfEmailExists(email);
 
         if (emailExists) return res.status(409).json({ message: 'Użytkownik z podanym emailem już istnieje' });
-        if (loginExist) return res.status(409).json({ message: 'Użytkownik z wprowadzonym loginem już istnieje' });
-
-        const loginRegex = /^.{3,45}$/;
-        if (!loginRegex.test(login)) return res.status(400).json({ message: 'Proszę wprowadzić login o długości od 3 do 45 znaków.' });
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(email)) return res.status(400).json({ message: 'Proszę wprowadzić poprawny adres e-mail.' });
         const nameRegex = /^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+){0,2}$/;
@@ -87,8 +82,6 @@ exports.register = async (req, res) => {
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 godziny
 
         // Tworzenie użytkownika
-        await userModel.createUser(login, hashedPassword, email, name, surname, verificationToken, verificationExpires);
-
         // ✅ Link weryfikacyjny - używa BACKEND_URL ze zmiennych środowiskowych
         const verifyLink = `${BACKEND_URL}/api/auth/verify?token=${verificationToken}`;
 
