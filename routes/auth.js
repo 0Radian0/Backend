@@ -4,7 +4,7 @@ const authFunction = require('../functions/authFunction');
 const usersFunction = require('../functions/usersFunction');
 const mailFunction = require('../functions/mailFunction');
 
-//router.post('/login', authFunction.login); 
+router.post('/login', authFunction.login); 
 router.post('/register', authFunction.register);
 router.get("/verify", authFunction.verifyAccount);
 
