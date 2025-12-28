@@ -61,7 +61,6 @@ exports.register = async (req, res) => {
     const { password, email, name, surname } = req.body;
     try {
         // walidacja
-
         const emailExists = await userModel.checkIfEmailExists(email);
 
         if (emailExists) return res.status(409).json({ message: 'Użytkownik z podanym emailem już istnieje' });
@@ -81,14 +80,16 @@ exports.register = async (req, res) => {
         const verificationToken = crypto.randomBytes(32).toString("hex");
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 godziny
 
-        // Tworzenie użytkownika
-        // ✅ Link weryfikacyjny - używa BACKEND_URL ze zmiennych środowiskowych
+        // ✅ DODANE: Tworzenie użytkownika w bazie danych
+        await userModel.createUser(hashedPassword, email, name, surname, verificationToken, verificationExpires);
+
+        // Link weryfikacyjny - używa BACKEND_URL ze zmiennych środowiskowych
         const verifyLink = `${BACKEND_URL}/api/auth/verify?token=${verificationToken}`;
 
         console.log('📧 Wysyłam mail weryfikacyjny na:', email);
         console.log('🔗 Link weryfikacyjny:', verifyLink);
 
-        // ✅ Bezpośrednie wywołanie funkcji sendEmail
+        // Bezpośrednie wywołanie funkcji sendEmail
         await sendEmail({
             body: {
                 toWho: email,
