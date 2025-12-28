@@ -33,12 +33,28 @@ const checkIfEmailExists = async (email) => {
 
 // Tworzenie użytkownika
 const createUser = async (password, email, name, surname, token, expires) => {
-    return db.execute(`INSERT INTO users (password, email, registrationDate, 
-        lastLog, description, rankID, deactivated, name, surname, paymentActive, 
-        verified, verificationToken, verificationExpires, resetPasswordToken, resetPasswordExpires ) 
-        VALUES (?, ?, ?, NOW(), NOW(), NULL, 3, false, ?, ?, true, false, ?, ?, NULL, NULL)`,
-        [ password, email, name, surname, token, expires]);
-}
+    return db.execute(
+        `INSERT INTO users (
+            password, 
+            email, 
+            registrationDate, 
+            lastLog, 
+            description, 
+            rankID, 
+            deactivated, 
+            name, 
+            surname, 
+            paymentActive, 
+            verified, 
+            verificationToken, 
+            verificationExpires, 
+            resetPasswordToken, 
+            resetPasswordExpires
+        ) VALUES (?, ?, NOW(), NOW(), NULL, 3, false, ?, ?, true, false, ?, ?, NULL, NULL)`,
+        [password, email, name, surname, token, expires]
+        // 1        2      3     4       5      6
+    );
+};
 
 // Filtrowanie użytkowników
 const filterUsers = async (rankID, statusFilter, tempSort = "name", order = "ASC") => {
