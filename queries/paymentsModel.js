@@ -1,4 +1,4 @@
-const db = require('../config/db');         //Do poprawy
+const db = require('../config/db');
 
 // Wyświetlanie salda płatności dla użytkownika
 const getPaymentStatus = async (userID) => {
@@ -57,25 +57,37 @@ const setPaymentDateOnToday = async (id) => {
     return db.execute(`UPDATE payments SET paymentDate = NOW() WHERE paymentID = ?`, [id]);
 }
 
-// Modyfikowanie szczegołów płatności
+// Modyfikowanie szczegółów płatności
 const modifyPayment = async (paymentDate, dueDate, amount, id) => {
     return db.execute(`UPDATE payments SET paymentDate = ?, dueDate = ?, amount = ? WHERE paymentID = ?`, [paymentDate, dueDate, amount, id]);
 }
 
-// Pobieranie statusów do tabelki porównawczej
+// ✅ POPRAWIONA FUNKCJA - dodano userID, surname i email
 const showUserPaymentStatus = async () => {
-    const [tab] = await db.execute(`SELECT u.name,
+    const [tab] = await db.execute(`
+        SELECT 
+            u.userID,
+            u.name,
+            u.surname,
+            u.email,
             COALESCE(SUM(CASE WHEN p.paymentDate IS NULL THEN p.amount ELSE 0 END), 0) AS sumToPay,
             MAX(p.paymentDate) AS lastPaymentDate
         FROM users u
         LEFT JOIN payments p ON u.userID = p.userID
-        GROUP BY u.userID, u.name
+        GROUP BY u.userID, u.name, u.surname, u.email
         ORDER BY COALESCE(SUM(CASE WHEN p.paymentDate IS NULL THEN p.amount ELSE 0 END), 0) DESC,
             MAX(p.paymentDate) ASC
-        `);
+    `);
     return tab;
 }
 
 module.exports = {
-    getPaymentStatus, getAllPaymentsByID, addMultiplePayments, addSinglePayment, deletePayment, setPaymentDateOnToday, modifyPayment, showUserPaymentStatus
-}    
+    getPaymentStatus, 
+    getAllPaymentsByID, 
+    addMultiplePayments, 
+    addSinglePayment, 
+    deletePayment, 
+    setPaymentDateOnToday, 
+    modifyPayment, 
+    showUserPaymentStatus
+}
