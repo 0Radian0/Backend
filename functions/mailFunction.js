@@ -16,7 +16,8 @@ exports.sendEmail = async (req, res) => {
         // Wysyłka maila
         
         const data = await resend.emails.send({
-            from: 'Szermierka Historyczna <onboarding@resend.dev>', // ✅ Domyślny adres (dopóki nie dodasz domeny)
+            from: 'Szermierka Historyczna <kontakt@szermierka.ovh>',
+
             to: toWho,
             subject: subject,
             html: html || `<p>${content}</p>`,

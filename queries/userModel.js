@@ -120,7 +120,7 @@ const filterUsers = async (rankID, statusFilter, tempSort = "name", order = "ASC
 // Usuwanie użytkownika
 const deleteUser = async (id) => {
     await db.execute('DELETE FROM payments WHERE userID = ?', [id]);
-    await db.execute('UPDATE posts SET userID = NULL WHERE userID = ?', [id]);
+    
     return db.execute('DELETE FROM users WHERE userID = ?', [id])
 }
 
