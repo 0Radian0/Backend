@@ -36,14 +36,19 @@ app.use((req, res, next) => {
 
 
 
+// app.use(cors({
+//   origin: "http://localhost:3000",
+//   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+//   allowedHeaders: ["Content-Type","Authorization"],
+//   credentials: true
+// }));
+
 app.use(cors({
   origin: "https://szermierka-historyczna-lublin.netlify.app",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
-
-
 
 /**
  * ===============================
@@ -82,10 +87,10 @@ async function testDatabaseConnection() {
       database: process.env.DB_NAME,
       port: process.env.DB_PORT
     });
-    console.log("✅ Połączono z bazą danych!");
+    console.log("Połączono z bazą danych!");
     await connection.end();
   } catch (err) {
-    console.error("❌ Błąd połączenia z bazą danych:", err.message);
+    console.error("Błąd połączenia z bazą danych:", err.message);
   }
 }
 
