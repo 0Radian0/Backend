@@ -85,13 +85,13 @@ exports.modifyTraining = async (req, res) => {
 exports.addUserToTraining = async (req, res) => {
     const { userID, trainingID } = req.body;
 
-    if (!userID || !trainingID) return res.status(400).json({ error: "Brak wymaganych danych - nie można zapisać użytkownika na trening" });
+    if (!userID || !trainingID) return res.status(400).json({ success: false, message: "Brak wymaganych danych - nie można zapisać użytkownika na trening" });
 
     try {
         const tab = await trainingsModel.showAllTrainingParticipants(trainingID);
         const isAlreadySign = tab.some(p => p.userID === Number(userID));
 
-        if (isAlreadySign) return res.status(400).json({ error: "Użytkownik jest już zapisany na trening" })
+        if (isAlreadySign) return res.status(400).json({success: false, message: "Użytkownik jest już zapisany na trening" })
 
         await trainingsModel.addUserToTraining(userID, trainingID);
         res.status(200).json({
@@ -126,13 +126,14 @@ exports.showAllTrainingParticipants = async (req, res) => {
 // usuń uczestnika z treningu
 exports.removeUserFromTraining = async (req, res) => {
     const { userID, trainingID  } = req.params;
+    console.log(req.params)
 
-    if (!userID || !trainingID ) return res.status(400).json({ error: "Ups. Brak wymaganych danych" });
+    if (!userID || !trainingID ) return res.status(400).json({ success: false, message: "Ups. Brak wymaganych danych" });
 
     try {
         // Sprawdzenie czy użytkownik rzeczywiście jest zapisany na trening
         const [result] = await trainingsModel.removeUserFromTraining(userID, trainingID);
-        if (result.affectedRows === 0) return res.status(404).json({ error: "Uczestnik nie był zapisany na trening" });
+        if (result.affectedRows === 0) return res.status(404).json({success: false, message: "Uczestnik nie był zapisany na trening" });
         res.status(200).json({
             success: true,
             message: "Uczestnik został wypisany z treningu",

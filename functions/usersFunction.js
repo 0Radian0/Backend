@@ -68,7 +68,7 @@ exports.resetPassword = async (req, res) => {
         const user = await userModel.getUserByID(userID);
         if (!user) return res.status(404).json({ error: "Nie znaleziono użytkownika" });
 
-        //  Bezpośrednie wywołanie sendEmail (nie przez fetch!)
+        // Bezpośrednie wywołanie sendEmail (nie przez fetch!)
         await sendEmail({
             body: {
                 toWho: user.email,
@@ -225,13 +225,13 @@ exports.sendForgotPasswordEmail = async (req, res) => {
 
         await userModel.createResetPasswordToken(email, resetPasswordToken, resetPasswordExpires);
 
-        //  Link weryfikacyjny - używa FRONTEND_URL ze zmiennych środowiskowych
+        // Link weryfikacyjny - używa FRONTEND_URL ze zmiennych środowiskowych
         const resetLink = `${FRONTEND_URL}/resetPass/${resetPasswordToken}`;
 
-        console.log(' Wysyłam link resetu hasła na:', email);
-        console.log('Link resetu:', resetLink);
+        console.log('📧 Wysyłam link resetu hasła na:', email);
+        console.log('🔗 Link resetu:', resetLink);
 
-        //  Bezpośrednie wywołanie sendEmail (nie przez fetch!)
+        // Bezpośrednie wywołanie sendEmail (nie przez fetch!)
         await sendEmail({
             body: {
                 toWho: email,
