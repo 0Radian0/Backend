@@ -28,10 +28,10 @@ async function importSQL() {
       await connection.query(stmt);
     }
 
-    console.log('✅ Plik szermierka.sql zaimportowany do Railway!');
+    console.log(' Plik szermierka.sql zaimportowany do Railway!');
     await connection.end();
   } catch (err) {
-    console.error('❌ Błąd importu SQL:', err);
+    console.error(' Błąd importu SQL:', err);
   }
 }
 

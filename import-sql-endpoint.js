@@ -30,11 +30,11 @@ router.post('/import-sql', async (req, res) => {
     }
 
     await connection.end();
-    console.log('✅ Plik szermierka.sql zaimportowany do Railway!');
-    res.send('✅ Plik SQL zaimportowany do Railway!');
+    console.log(' Plik szermierka.sql zaimportowany do Railway!');
+    res.send(' Plik SQL zaimportowany do Railway!');
   } catch (err) {
-    console.error('❌ Błąd importu SQL:', err);
-    res.status(500).send('❌ Błąd importu SQL');
+    console.error(' Błąd importu SQL:', err);
+    res.status(500).send(' Błąd importu SQL');
   }
 });
 
