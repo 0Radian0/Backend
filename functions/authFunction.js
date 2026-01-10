@@ -5,12 +5,12 @@ const userModel = require('../queries/userModel');
 const db = require('../config/db');
 const { sendEmail } = require("./mailFunction");
 
-// ✅ Dynamiczne URLe - pobierane ze zmiennych środowiskowych Railway
+//  Dynamiczne URLe - pobierane ze zmiennych środowiskowych Railway
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-console.log('🔍 BACKEND_URL:', BACKEND_URL);
-console.log('🔍 FRONTEND_URL:', FRONTEND_URL);
+console.log(' BACKEND_URL:', BACKEND_URL);
+console.log(' FRONTEND_URL:', FRONTEND_URL);
 
 // Logowanie
 exports.login = async (req, res) => {
@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Błąd logowania:', error);
+        console.error(' Błąd logowania:', error);
         res.status(500).json({ message: 'Błąd serwera' });
     }
 };
@@ -80,14 +80,14 @@ exports.register = async (req, res) => {
         const verificationToken = crypto.randomBytes(32).toString("hex");
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 godziny
 
-        // ✅ DODANE: Tworzenie użytkownika w bazie danych
+        //  Tworzenie użytkownika w bazie danych
         await userModel.createUser(hashedPassword, email, name, surname, verificationToken, verificationExpires);
 
         // Link weryfikacyjny - używa BACKEND_URL ze zmiennych środowiskowych
         const verifyLink = `${BACKEND_URL}/api/auth/verify?token=${verificationToken}`;
 
-        console.log('📧 Wysyłam mail weryfikacyjny na:', email);
-        console.log('🔗 Link weryfikacyjny:', verifyLink);
+        console.log(' Wysyłam mail weryfikacyjny na:', email);
+        console.log(' Link weryfikacyjny:', verifyLink);
 
         // Bezpośrednie wywołanie funkcji sendEmail
         await sendEmail({
@@ -121,7 +121,7 @@ exports.register = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('❌ Błąd rejestracji:', err);
+        console.error(' Błąd rejestracji:', err);
         return res.status(500).json({ message: 'Błąd serwera: ' + err.message });
     }
 };
@@ -143,13 +143,13 @@ exports.verifyAccount = async (req, res) => {
         // Aktywacja konta
         await userModel.verifyEmail(user.userID);
 
-        console.log('✅ Konto zweryfikowane, przekierowanie na:', `${FRONTEND_URL}/login?verified=true`);
+        console.log(' Konto zweryfikowane, przekierowanie na:', `${FRONTEND_URL}/login?verified=true`);
 
-        // ✅ Przekierowanie na frontend - używa FRONTEND_URL ze zmiennych środowiskowych
+        //  Przekierowanie na frontend - używa FRONTEND_URL ze zmiennych środowiskowych
         return res.redirect(`${FRONTEND_URL}/login?verified=true`);
 
     } catch (err) {
-        console.error("❌ Błąd weryfikacji konta:", err);
+        console.error(" Błąd weryfikacji konta:", err);
         return res.status(500).json({ message: "Błąd serwera" });
     }
 };

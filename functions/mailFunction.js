@@ -7,7 +7,7 @@ exports.sendEmail = async (req, res) => {
         return res.status(400).json({ error: "Brak danych do wysyłki maila" });
     }
 
-    console.log("📧 Próba wysłania maila do:", toWho);
+    console.log(" Próba wysłania maila do:", toWho);
 
     try {
         // Inicjalizacja Resend z API Key
@@ -23,7 +23,7 @@ exports.sendEmail = async (req, res) => {
             html: html || `<p>${content}</p>`,
         });
 
-        console.log("✅ Mail wysłany! ID:", data.id);
+        console.log(" Mail wysłany! ID:", data.id);
         
         res.status(200).json({ 
             message: "Mail wysłany pomyślnie!",
@@ -31,8 +31,8 @@ exports.sendEmail = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("❌ Błąd wysyłki maila:");
-        console.error("❌ Szczegóły:", err);
+        console.error(" Błąd wysyłki maila:");
+        console.error(" Szczegóły:", err);
         
         res.status(500).json({ 
             error: "Nie udało się wysłać maila.",

@@ -15,11 +15,11 @@ const connection = mysql.createPool({
 // Test połączenia przy starcie
 connection.getConnection()
     .then(conn => {
-        console.log('✅ Połączono z bazą danych MySQL');
+        console.log(' Połączono z bazą danych MySQL');
         conn.release();
     })
     .catch(err => {
-        console.error('❌ Błąd połączenia z bazą danych:', err.message);
+        console.error(' Błąd połączenia z bazą danych:', err.message);
     });
 
 module.exports = connection;

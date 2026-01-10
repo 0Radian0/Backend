@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
     await connection.end();
     res.json({ tables: rows });
   } catch (err) {
-    res.status(500).send(`❌ Błąd połączenia lub brak tabel: ${err.message}`);
+    res.status(500).send(` Błąd połączenia lub brak tabel: ${err.message}`);
   }
 });
 
