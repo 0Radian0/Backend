@@ -62,7 +62,7 @@ const modifyPayment = async (paymentDate, dueDate, amount, id) => {
     return db.execute(`UPDATE payments SET paymentDate = ?, dueDate = ?, amount = ? WHERE paymentID = ?`, [paymentDate, dueDate, amount, id]);
 }
 
-//  
+// Wyświetlanie stausu płatności użytkownika
 const showUserPaymentStatus = async () => {
     const [tab] = await db.execute(`
         SELECT 
