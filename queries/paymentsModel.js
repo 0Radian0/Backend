@@ -44,7 +44,8 @@ const addSinglePayment = async (userID, paymentDate, dueDate, amount) => {
 const addMultiplePayments = async (paymentDate, dueDate, amount) => {
     return db.execute(`INSERT INTO payments (paymentDate, dueDate, amount, userID)
         SELECT ?, ?, ?, userID
-        FROM users;`, [paymentDate, dueDate, amount]);
+        FROM users
+        WHERE paymentActive = 1;`, [paymentDate, dueDate, amount]);
 }
 
 // Usuwanie płatności
