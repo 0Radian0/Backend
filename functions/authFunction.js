@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Wprowadzono niepoprawne hasło' });
         }
 
-        const token = jwt.sign({ id: user.userID }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.userID }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
         // Ustawianie daty ostatniego logowania na dziś
         await userModel.setLastLogOnToday(user.userID);
